@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จดหมายถึง KK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@400;500;600&family=Sarabun:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+
+  
+
+  :root{
+    --nothing: none;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  :root{
+    --wine: #5b2333;
+    --wine-deep: #451a27;
+    --blush: #e8c9c9;
+    --blush-soft: #f3ded9;
+    --paper: #fdf6ee;
+    --paper-line: #e9dcc8;
+    --gold: #b3894f;
+    --gold-light: #d8b788;
+    --ink: #43302b;
+    --ink-soft: #7a6459;
+  }
+
+  html, body{
+    height:100%;
+    background: radial-gradient(circle at 50% 20%, #7a3247 0%, #4a1c2a 55%, #34141e 100%);
+    font-family: 'Sarabun', sans-serif;
+    color: var(--ink);
+    overflow-x:hidden;
+  }
+
+  .stage{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 40px 20px;
+    position:relative;
+  }
+
+  .petal{
+    position:fixed;
+    top:-40px;
+    width:14px;
+    height:14px;
+    background: var(--blush);
+    border-radius: 0 60% 0 60%;
+    opacity:0.55;
+    pointer-events:none;
+    animation: fall linear infinite;
+  }
+  @keyframes fall{
+    to{ transform: translateY(110vh) rotate(200deg); }
+  }
+
+  .chooser{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:36px;
+    text-align:center;
+  }
+  .chooser-title{
+    font-family:'Noto Serif Thai', serif;
+    font-size: 24px;
+    color: var(--blush-soft);
+    letter-spacing:0.5px;
+  }
+  .chooser-cards{
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .choice-card{
+    width: 200px;
+    padding: 32px 20px;
+    background: linear-gradient(180deg, var(--paper), #f6ead9);
+    border-radius: 10px;
+    cursor:pointer;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+    transition: transform .3s ease, box-shadow .3s ease;
+    border: 1px solid transparent;
+  }
+  .choice-card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 22px 40px rgba(0,0,0,0.45);
+  }
+  .choice-card .mark{
+    font-family:'Noto Serif Thai', serif;
+    font-size: 34px;
+    color: var(--wine);
+    margin-bottom:14px;
+  }
+  .choice-card.bad .mark{ color: var(--wine-deep); }
+  .choice-card .label{
+    font-family:'Noto Serif Thai', serif;
+    font-size: 19px;
+    font-weight:500;
+    color: var(--wine);
+    margin-bottom:8px;
+  }
+  .choice-card .desc{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height:1.6;
+  }
+
+  .hidden{ display:none !important; }
+
+  body.mood-sad{
+    background: radial-gradient(circle at 50% 20%, #4a5568 0%, #2d3748 55%, #1a202c 100%);
+    --wine: #4a5568;
+    --wine-deep: #2d3748;
+    --blush: #a0aec0;
+    --blush-soft: #cbd5e0;
+    --paper: #f2f1ee;
+    --paper-line: #d9d7d1;
+    --gold: #8892a0;
+    --gold-light: #aab2c0;
+    --ink: #3a4149;
+    --ink-soft: #6b7280;
+  }
+  body.mood-sad .env-body{
+    background: linear-gradient(180deg, var(--paper) 0%, #e6e4de 100%);
+  }
+  body.mood-sad .env-side-l, body.mood-sad .env-side-r{
+    background: linear-gradient(180deg, #e6e4de, #dcdad2);
+  }
+  body.mood-sad .chooser-title{
+    color: var(--blush-soft);
+  }
+
+  .envelope-wrap{
+    perspective: 1400px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:28px;
+  }
+
+  .envelope{
+    width: min(420px, 84vw);
+    aspect-ratio: 3 / 2;
+    position:relative;
+    cursor:pointer;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.45));
+  }
+
+  .env-body{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, var(--paper) 0%, #f6ead9 100%);
+    border-radius: 6px;
+  }
+
+  .env-shade{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(91,35,51,0.10), rgba(91,35,51,0));
+    border-radius:6px;
+  }
+
+  .env-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:58%;
+    background: linear-gradient(160deg, var(--blush-soft), var(--blush));
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transition: transform 1s cubic-bezier(.6,-0.1,.2,1.4);
+    z-index:3;
+    border-radius: 6px 6px 0 0;
+  }
+
+  .envelope.open .env-flap{
+    transform: rotateX(180deg);
+    z-index:1;
+  }
+
+  .env-side-l, .env-side-r{
+    position:absolute; bottom:0; width:52%; height:64%;
+    background: linear-gradient(180deg, #f1e2cd, #eadcc4);
+    z-index:2;
+  }
+  .env-side-l{ left:0; clip-path: polygon(0 100%, 0 0, 100% 100%); }
+  .env-side-r{ right:0; clip-path: polygon(100% 100%, 100% 0, 0 100%); }
+
+  .letter-peek{
+    position:absolute;
+    left:8%; right:8%;
+    bottom:6%;
+    height:0%;
+    background: var(--paper);
+    border: 1px solid var(--paper-line);
+    border-radius: 3px;
+    z-index:1;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.06);
+    transition: height 0.6s ease 0.9s, bottom 0.6s ease 0.9s;
+  }
+  .envelope.open .letter-peek{
+    height: 46%;
+    bottom: 26%;
+  }
+
+  .seal{
+    position:absolute;
+    top:50%; left:50%;
+    width:64px; height:64px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 35% 30%, var(--gold-light), var(--gold) 60%, #8a6636 100%);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    z-index:4;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35), inset 0 2px 4px rgba(255,255,255,0.35);
+    transition: transform .5s ease, opacity .5s ease;
+    font-family:'Noto Serif Thai', serif;
+    color: #fff3de;
+    font-size: 22px;
+  }
+  .envelope.open .seal{
+    transform: translate(-50%,-50%) scale(0.4) rotate(25deg);
+    opacity:0;
+  }
+
+  .hint{
+    color: var(--blush-soft);
+    font-family:'Noto Serif Thai', serif;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    opacity:0.85;
+    transition: opacity .4s ease;
+  }
+  .envelope.open ~ .hint{ opacity:0; }
+
+  .env-address{
+    position:absolute;
+    left:12%;
+    top:66%;
+    z-index:2;
+    font-family: 'Sarabun', sans-serif;
+    font-style: italic;
+    color: var(--wine-deep);
+    transform: rotate(-1.5deg);
+    transition: opacity .4s ease;
+  }
+  .envelope.open .env-address{ opacity:0; }
+
+  .env-address .to{
+    font-size: 18px;
+    font-weight:500;
+    margin-bottom:6px;
+  }
+  .env-address .to span{
+    display:inline-block;
+    border-bottom: 1px solid var(--gold);
+    padding-bottom:1px;
+  }
+  .env-address .from{
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-left: 20%;
+  }
+  .env-address .from span{
+    border-bottom: 1px solid var(--paper-line);
+  }
+
+  .letter-scene{
+    display:none;
+    width:100%;
+    justify-content:center;
+    padding: 60px 16px 90px;
+    opacity:0;
+    transform: translateY(30px);
+    animation: rise .9s ease forwards;
+  }
+  .letter-scene.show{ display:flex; }
+  @keyframes rise{ to{ opacity:1; transform:none; } }
+
+  .letter{
+    width:min(600px, 100%);
+    background: var(--paper);
+    background-image:
+      repeating-linear-gradient(var(--paper) 0px, var(--paper) 34px, var(--paper-line) 35px);
+    border-radius: 2px;
+    padding: 56px 44px 48px;
+    box-shadow:
+      0 30px 60px rgba(0,0,0,0.45),
+      0 2px 0 rgba(255,255,255,0.4) inset;
+    position:relative;
+  }
+
+  .letter::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0;
+    width:6px;
+    background: linear-gradient(180deg, var(--wine), var(--gold), var(--wine));
+    border-radius: 2px 0 0 2px;
+  }
+
+  .date{
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-align:right;
+    margin-bottom: 28px;
+    font-style: italic;
+  }
+
+  .salutation{
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 26px;
+    font-weight:500;
+    color: var(--wine);
+    margin-bottom: 22px;
+  }
+
+  .body-text p{
+    font-size: 17px;
+    line-height: 2.15;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+
+  .body-text .indent{ text-indent: 2em; }
+
+  .signoff{
+    margin-top: 34px;
+  }
+  .signoff p{ font-size:17px; line-height:2; }
+  .signature{
+    font-family:'Noto Serif Thai', serif;
+    font-size: 24px;
+    color: var(--wine);
+    margin-top: 6px;
+    font-weight:600;
+  }
+
+  .close-btn{
+    margin-top: 30px;
+    display:flex;
+    justify-content:center;
+  }
+  .close-btn button{
+    background:transparent;
+    border: 1px solid var(--blush-soft);
+    color: var(--blush-soft);
+    font-family:'Sarabun',sans-serif;
+    font-size: 14px;
+    padding: 10px 26px;
+    border-radius: 24px;
+    cursor:pointer;
+    letter-spacing:0.5px;
+    transition: background .3s ease, color .3s ease;
+  }
+  .close-btn button:hover{
+    background: var(--blush-soft);
+    color: var(--wine-deep);
+  }
+
+  @media (max-width:480px){
+    .letter{ padding: 44px 24px 36px; }
+    .salutation{ font-size:22px; }
+    .body-text p{ font-size:15.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <div class="chooser" id="chooser">
+    <div class="chooser-title">วันนี้อยากอ่านจดหมายแบบไหน</div>
+    <div class="chooser-cards">
+      <div class="choice-card good" id="pickGood">
+        <div class="mark">♥</div>
+        <div class="label">จดหมายดี</div>
+        <div class="desc">ไม่บอกหรอกไปอ่านเองง คิคิ</div>
+      </div>
+      <div class="choice-card bad" id="pickBad">
+        <div class="mark">☂</div>
+        <div class="label">จดหมายร้าย</div>
+        <div class="desc">คำอวยพรเล็กๆ น้อยๆ จากคนๆ นึง</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="envelope-wrap hidden" id="envWrap">
+    <div class="envelope" id="envelope">
+      <div class="env-body"></div>
+      <div class="letter-peek"></div>
+      <div class="env-side-l"></div>
+      <div class="env-side-r"></div>
+      <div class="env-address">
+        <div class="to">ถึง คุณ <span>KoKo ₍^. .^₎Ⳋ</span></div>
+        <div class="from">จาก <span>คนที่รักเธอ</span></div>
+      </div>
+      <div class="env-flap"></div>
+      <div class="seal">♥</div>
+    </div>
+    <div class="hint">แตะที่ตราประทับ เพื่อเปิดจดหมาย</div>
+  </div>
+
+  <div class="letter-scene" id="letterScene">
+    <div class="letter">
+      <div class="date" id="letterDate">25 สิงหาคม 2569</div>
+
+      <div class="salutation" id="letterSalutation">ถึง คนที่ฉันรัก,</div>
+
+      <div class="body-text" id="letterBody"></div>
+
+      <div class="signoff">
+        <p id="letterSignoffLabel">ด้วยรักเสมอ,</p>
+        <div class="signature" id="letterSignature">ของเธอคนเดิม</div>
+      </div>
+
+      <div class="close-btn">
+        <button id="closeBtn">ปิดจดหมาย</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const letters = {
+    good: {
+      date: '25 สิงหาคม 2569',
+      salutation: 'ถึง เบ๊บๆ ของเค้าา,',
+     paragraphs: [
+        'เย้้้้้ เย้้้้้  ขอบคุณที่ให้โอกาศคนๆ นี้นะ ที่ผ่านมาเกือบอาทิตย์ เค้าไปคิดทบทวนมาหมดแล้วว่าเค้าผิดพลาดตรงไหนบ้าง แล้วก็ทำให้รู้เลยว่าเค้ารักเบ๊บมากๆ และไม่ควรทำแบบนั้นใส่ แต่ก็เพราะเค้าอีกแล้วที่เอาเรื่องอื่นๆมาลงที่เบ๊บ เค้ายอมรับเลยอาทิตย์ที่ผ่านมาที่เค้าสอบเค้าไม่มีเวลาให้เบ๊บๆ มันมีช่วงที่เค้าพยายามชวนเบ๊บคุยแต่เบ๊บไม่ค่อยตอบ กับที่ว่าเค้าเครียดเรื่องสอบด้วย   เลยพูดและพิมอะไรไม่ดีใส่เบ๊บไปหลายอย่างเลย',
+        'ขอโทษและขอบคุณน้าาา เบ๊บๆ  กลับมารอบนี้แล้วเค้าจะแกล้งเบ๊บๆ ให้ดีที่สุด เอ้ยดูแลเบ๊บๆ ให้ดีที่สุด จะไม่ทำให้เบ๊บๆ เสียใจ แต่ถ้าเสียใจก็จะอยู่ข้างๆ ไม่ไปไหน ',
+        'เค้ารักเบ๊บๆ นะ'
+      ],
+      signoffLabel: 'รักเบ๊บๆ ตะเมอออ,',
+      signature: 'จาก คนที่ยักเบ๊บๆ มากกกๆๆๆๆๆ'
+
+    },
+    bad: {
+      date: '25 สิงหาคม 2569',
+      salutation: 'ถึง Koko,',
+      paragraphs: [
+        'เราเข้าใจแกนะที่ไม่อยากไปต่อกับเราแล้ว เพราะด้วยเราทำตัวแย่กับแกไว้มากๆ หลายเรื่องก็เป็นเรื่องเดิมๆ ที่เคยคุยกันไปแล้ว แต่ก็นั้นแหละ เราอาจจะเผลอตัวทำไปอีกแต่ก็ไม่โทษใครเป็นที่เราเอง',
+        'ที่ผ่านมาเรามีความสุขมากเลยนะที่ได้มีแกในชีวิต ได้ทำอะไรด้วยกัน แกสอนอะไรเราเยอะมาก จนบางครั้งเราแอบคิดนะว่าแกดูโตกว่าเราอีก แกเก่งมากเลยนะที่เด็ดขาดมากตั้งใจจะตัดก็ตัดจริงๆ จนบางครั้งเราก็แอบกลัวแกนะเวลาแกคิดจะไป',
+        'สุดท้ายแล้ว จากกันครั้งนี้ไป ก็ขอให้เจอคนที่ดีกว่าเรา ไม่ทำตัวแย่ๆ ใส่แก ดูแลแกดีกว่าเราเยอะๆๆๆ ใส่ใจแกมากกว่าเรา และเราก็คงไม่ทักไปหาแกอีกแล้ว ขอให้แกโชคดีนะ ถ้าแกอยากติดต่อเราก็ทักมาให้เราได้ตลอดนะ'
+      ],
+      signoffLabel: 'โชคดีนะ,',
+      signature: 'จาก คนที่หวังดีกับแกเสมอ'
+    }
+  };
+
+  const chooser = document.getElementById('chooser');
+  const pickGood = document.getElementById('pickGood');
+  const pickBad = document.getElementById('pickBad');
+  const envelope = document.getElementById('envelope');
+  const envWrap = document.getElementById('envWrap');
+  const letterScene = document.getElementById('letterScene');
+  const closeBtn = document.getElementById('closeBtn');
+  const stage = document.getElementById('stage');
+
+  const letterDate = document.getElementById('letterDate');
+  const letterSalutation = document.getElementById('letterSalutation');
+  const letterBody = document.getElementById('letterBody');
+  const letterSignoffLabel = document.getElementById('letterSignoffLabel');
+  const letterSignature = document.getElementById('letterSignature');
+
+  function fillLetter(type){
+    const data = letters[type];
+    letterDate.textContent = data.date;
+    letterSalutation.textContent = data.salutation;
+    letterBody.innerHTML = '';
+    data.paragraphs.forEach(text => {
+      const p = document.createElement('p');
+      p.className = 'indent';
+      p.textContent = text;
+      letterBody.appendChild(p);
+    });
+    letterSignoffLabel.textContent = data.signoffLabel;
+    letterSignature.textContent = data.signature;
+  }
+
+  function choose(type){
+    fillLetter(type);
+    chooser.classList.add('hidden');
+    envWrap.classList.remove('hidden');
+    document.body.classList.toggle('mood-sad', type === 'bad');
+    createPetals(type === 'bad');
+  }
+
+  pickGood.addEventListener('click', () => choose('good'));
+  pickBad.addEventListener('click', () => choose('bad'));
+
+  envelope.addEventListener('click', () => {
+    if (envelope.classList.contains('open')) return;
+    envelope.classList.add('open');
+    setTimeout(() => {
+      envWrap.style.display = 'none';
+      letterScene.classList.add('show');
+      stage.scrollIntoView({behavior:'smooth'});
+    }, 1500);
+  });
+
+  closeBtn.addEventListener('click', () => {
+    letterScene.classList.remove('show');
+    envelope.classList.remove('open');
+    envWrap.classList.add('hidden');
+    envWrap.style.display = 'flex';
+    chooser.classList.remove('hidden');
+    document.body.classList.remove('mood-sad');
+    createPetals(false);
+  });
+
+  const petalColorsGood = ['#e8c9c9', '#f3ded9', '#d8b788'];
+  const petalColorsSad = ['#9aa5b1', '#c3cad3', '#7c8792'];
+
+  function createPetals(sad){
+    document.querySelectorAll('.petal').forEach(el => el.remove());
+    const colors = sad ? petalColorsSad : petalColorsGood;
+    const count = sad ? 22 : 18;
+    for (let i = 0; i < count; i++){
+      const p = document.createElement('div');
+      p.className = 'petal';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.background = colors[i % colors.length];
+      const dur = sad ? (12 + Math.random()*14) : (8 + Math.random()*10);
+      p.style.animationDuration = dur + 's';
+      p.style.animationDelay = (Math.random()*10) + 's';
+      const size = sad ? (6 + Math.random()*7) : (8 + Math.random()*10);
+      p.style.width = size + 'px';
+      p.style.height = (sad ? size * 1.6 : size) + 'px';
+      p.style.borderRadius = sad ? '50% 50% 50% 50% / 60% 60% 40% 40%' : '0 60% 0 60%';
+      p.style.opacity = sad ? '0.4' : '0.55';
+      document.body.appendChild(p);
+    }
+  }
+  createPetals(false);
+</script>
+
+</body>
+</html>
